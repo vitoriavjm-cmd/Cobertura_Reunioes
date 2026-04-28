@@ -1,0 +1,460 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600&family=Inter:wght@400;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bd-navy:#031C2D; --bd-teal:#177A8B; --bd-turquoise:#299FB1; --bd-cyan:#0ACFDE;
+    --bd-black:#1F1F1F; --bd-gray:#E6E6E6; --bd-white:#FFFFFF;
+    --bd-gradient:linear-gradient(135deg,#177A8B 0%,#031C2D 100%);
+    --brand-blue:var(--bd-navy); --brand-blue-mid:var(--bd-teal);
+    --brand-blue-light:#e8f5f7; --brand-accent:var(--bd-cyan); --brand-accent-light:#d0f8fb;
+    --green:#2e7d32; --green-bg:#e8f5e9; --yellow:#f57f17; --yellow-bg:#fff8e1;
+    --red:#c62828; --red-bg:#ffebee;
+    --gray:#6b7280; --border:rgba(0,0,0,0.09); --surface:#ffffff; --page-bg:#f0f4f6;
+    --sidebar-w:224px; --font-title:'Archivo',sans-serif; --font-body:'Inter',sans-serif;
+  }
+  body { font-family:var(--font-body); background:var(--page-bg); color:var(--bd-black); }
+  h1,h2,h3,.card-title,.modal-title,.header-title,.metric-value,.empty-title,.client-name,.gauge-pct { font-family:var(--font-title); }
+  .shell { display:flex; min-height:100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width:var(--sidebar-w); flex-shrink:0;
+    background:var(--bd-gradient);
+    display:flex; flex-direction:column;
+    position:fixed; top:0; left:0; bottom:0; z-index:50;
+    transition:transform 0.3s ease;
+    box-shadow:2px 0 16px rgba(3,28,45,0.22);
+  }
+
+  /* ── LOGO AREA ── */
+  .sidebar-logo {
+    padding: 24px 20px 18px;          
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;                          
+  }
+  .sidebar-logo img {
+    height: 56px;                      
+    width: auto;
+    max-width: 180px;                  
+    display: block;
+    object-fit: contain;
+    margin-left: -4px;                 
+  }
+  .sidebar-logo-sub {
+    font-family: var(--font-body);
+    font-size: 12px;                   
+    font-weight: 300;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  /* ─────────────────────────────────────────────── */
+
+  .sidebar-nav { flex:1; overflow-y:auto; padding:10px 0 20px; }
+  .sidebar-nav::-webkit-scrollbar { width:3px; }
+  .sidebar-nav::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+  .nav-section { margin-bottom:2px; }
+  .nav-section-label { font-size:9px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.35); padding:10px 18px 3px; font-family:var(--font-title); }
+  .nav-item { display:flex; align-items:center; gap:9px; padding:9px 18px; cursor:pointer; color:rgba(255,255,255,0.6); font-size:13px; font-weight:400; border-left:3px solid transparent; transition:all 0.15s; user-select:none; font-family:var(--font-body); }
+  .nav-item:hover { background:rgba(10,207,222,0.1); color:#fff; }
+  .nav-item.active { background:rgba(10,207,222,0.15); border-left-color:var(--bd-cyan); color:#fff; font-weight:600; font-family:var(--font-title); }
+  .nav-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .sidebar-footer { padding:12px 18px; border-top:1px solid rgba(255,255,255,0.08); font-size:10px; color:rgba(255,255,255,0.3); font-family:var(--font-body); }
+
+  /* ── MAIN ── */
+  .main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-width:0; }
+  
+  /* ── HEADER AJUSTADO ── */
+  .header { background:var(--surface); padding:24px 24px 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .header-left { display:flex; align-items:center; gap:12px; }
+  .hamburger { display:none; width:32px; height:32px; background:rgba(10,207,222,0.12); border:1px solid rgba(10,207,222,0.3); border-radius:6px; color:var(--bd-cyan); font-size:16px; cursor:pointer; align-items:center; justify-content:center; flex-shrink:0; }
+  .header-title { font-size:18px; font-weight:600; color:var(--bd-navy); font-family:var(--font-title); letter-spacing:0.01em; }
+  .header-sub { font-size:12px; color:var(--gray); margin-top:3px; font-family:var(--font-body); }
+  .header-date { font-size:12px; color:var(--gray); white-space:nowrap; font-family:var(--font-body); font-weight:400; }
+  
+  /* ── TABS ── */
+  .tabs { background:var(--surface); border-bottom:1px solid var(--bd-gray); display:flex; padding:0 24px; }
+  .tab { padding:13px 18px; font-size:13px; font-weight:400; color:var(--gray); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; white-space:nowrap; font-family:var(--font-body); }
+  .tab:hover { color:var(--bd-teal); }
+  .tab.active { color:var(--bd-navy); border-bottom-color:var(--bd-cyan); font-weight:600; font-family:var(--font-title); }
+  
+  .content { padding:22px 24px; flex:1; }
+  .empty-carteira { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:340px; gap:14px; text-align:center; }
+  .empty-icon { font-size:48px; opacity:0.2; }
+  .empty-title { font-size:18px; font-weight:600; color:var(--bd-navy); font-family:var(--font-title); }
+  .empty-sub { font-size:13px; color:var(--gray); max-width:320px; font-family:var(--font-body); }
+  
+  /* ── METRICS (CANTOS MAIS ARREDONDADOS E SOMBRAS SUAVES) ── */
+  .metrics-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:16px; margin-bottom:24px; }
+  .metric-card { 
+    background:var(--surface); 
+    border-radius:16px; 
+    padding:18px 20px; 
+    border:none; 
+    box-shadow:0 4px 20px rgba(3,28,45,0.04); 
+    border-top:4px solid var(--bd-turquoise); 
+  }
+  .metric-label { font-size:10px; color:var(--gray); font-weight:600; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:5px; font-family:var(--font-title); }
+  .metric-value { font-size:28px; font-weight:600; color:var(--bd-navy); font-family:var(--font-title); }
+  .metric-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; margin-top:3px; padding:3px 10px; border-radius:20px; font-weight:600; font-family:var(--font-body); }
+  .badge-green{background:var(--green-bg);color:var(--green);}
+  .badge-yellow{background:var(--yellow-bg);color:var(--yellow);}
+  .badge-red{background:var(--red-bg);color:var(--red);}
+  
+  /* ── CARDS (SOMBRAS E BORDAS ARREDONDADAS) ── */
+  .dash-grid { display:grid; grid-template-columns:280px 1fr; gap:20px; align-items:start; }
+  .card { 
+    background:var(--surface); 
+    border-radius:16px; 
+    border:none; 
+    box-shadow:0 4px 24px rgba(3,28,45,0.05); 
+    overflow:hidden; 
+  }
+  .card-header { padding:16px 20px; border-bottom:1px solid rgba(0,0,0,0.04); display:flex; align-items:center; justify-content:space-between; background:var(--surface); }
+  .card-title { font-size:14px; font-weight:600; color:var(--bd-navy); font-family:var(--font-title); }
+  .card-body { padding:20px; }
+  .card-tag { font-size:10px; color:var(--bd-teal); background:#e8f5f7; padding:4px 10px; border-radius:20px; font-family:var(--font-body); font-weight:600; }
+  
+  .gauge-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .gauge-pct { font-size:40px; font-weight:600; line-height:1; font-family:var(--font-title); }
+  .gauge-sub { font-size:12px; color:var(--gray); font-family:var(--font-body); }
+  .gauge-bar { width:100%; height:10px; border-radius:5px; background:var(--bd-gray); overflow:hidden; }
+  .gauge-fill { height:100%; border-radius:5px; transition:width 0.8s ease; }
+  .gauge-legend { display:flex; gap:8px; font-size:10px; flex-wrap:wrap; justify-content:center; }
+  .gauge-leg-item { display:flex; align-items:center; gap:4px; color:var(--gray); font-family:var(--font-body); }
+  .dot { width:8px; height:8px; border-radius:50%; }
+  
+  .status-list { display:flex; flex-direction:column; gap:12px; }
+  .status-row { display:flex; align-items:center; font-size:12px; font-family:var(--font-body); }
+  .status-label { color:var(--gray); width:160px; flex-shrink:0; font-weight:400; }
+  .status-bar-wrap { flex:1; margin:0 12px; height:6px; background:var(--bd-gray); border-radius:4px; overflow:hidden; }
+  .status-bar { height:100%; border-radius:4px; }
+  .status-count { font-weight:600; color:var(--bd-navy); font-size:13px; min-width:20px; text-align:right; }
+  
+  /* ── TABLE & OTHERS ── */
+  .table-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .search-wrap { position:relative; }
+  .search-input { padding:10px 14px 10px 38px; border:1px solid var(--bd-gray); border-radius:10px; font-size:13px; outline:none; background:var(--surface); color:var(--bd-black); width:240px; font-family:var(--font-body); transition:all 0.2s; }
+  .search-input:focus { border-color:var(--bd-cyan); box-shadow:0 0 0 3px rgba(10,207,222,0.12); }
+  .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--gray); font-size:14px; pointer-events:none; }
+  .btn-primary { background:var(--bd-teal); color:#fff; border:none; padding:10px 18px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px; font-family:var(--font-title); letter-spacing:0.01em; transition:background 0.15s; }
+  .btn-primary:hover { background:var(--bd-navy); }
+  .btn-secondary { background:var(--surface); color:var(--bd-teal); border:1px solid var(--bd-turquoise); padding:10px 16px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; font-family:var(--font-title); }
+  .tbl-wrap { overflow-x:auto; border-radius:16px; box-shadow:0 4px 20px rgba(3,28,45,0.03); background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th { background:rgba(23,122,139,0.04); color:var(--bd-teal); font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:0.07em; padding:14px 16px; text-align:left; border-bottom:1px solid rgba(0,0,0,0.04); white-space:nowrap; font-family:var(--font-title); }
+  td { padding:14px 16px; border-bottom:1px solid rgba(0,0,0,0.04); vertical-align:middle; color:var(--bd-black); font-family:var(--font-body); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(10,207,222,0.03); }
+  .client-name { font-weight:600; color:var(--bd-navy); font-size:13px; font-family:var(--font-title); }
+  .avatar { width:30px; height:30px; border-radius:50%; background:var(--bd-teal); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; margin-right:10px; flex-shrink:0; font-family:var(--font-title); }
+  .name-cell { display:flex; align-items:center; }
+  .tag { display:inline-flex; align-items:center; font-size:10px; padding:3px 8px; border-radius:6px; font-weight:600; margin:2px; font-family:var(--font-body); }
+  .tag-blue{background:#e8f5f7;color:var(--bd-teal);}
+  .tag-teal{background:#e0f2f1;color:#00695c;}
+  .tag-purple{background:#ede7f6;color:#512da8;}
+  .tag-orange{background:#fff3e0;color:#e65100;}
+  .tag-pink{background:#fce4ec;color:#880e4f;}
+  .tag-gray2{background:#f3f4f6;color:#374151;}
+  .check-icon{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;}
+  .check-yes{background:var(--green-bg);color:var(--green);}
+  .check-no{background:#f3f4f6;color:#9ca3af;}
+  .recorrencia{font-size:10px;color:var(--bd-teal);background:#e8f5f7;padding:3px 8px;border-radius:6px;border:1px solid #c2e8ed;font-family:var(--font-body);}
+  .date-cell{font-size:12px;white-space:nowrap;font-family:var(--font-body);}
+  .date-past{color:var(--red);font-weight:600;}
+  .date-soon{color:var(--yellow);font-weight:600;}
+  .date-ok{color:var(--green);}
+  .actions{display:flex;gap:6px;}
+  .btn-icon{width:28px;height:28px;border-radius:8px;border:1px solid var(--bd-gray);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px; transition:all 0.15s;}
+  .btn-icon:hover{background:#e8f5f7;border-color:var(--bd-turquoise);}
+  .obs-cell{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--gray);}
+  
+  /* ── MODAL ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(3,28,45,0.6);backdrop-filter:blur(3px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .modal{background:var(--surface);border-radius:20px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(3,28,45,0.25);}
+  .modal-header{padding:20px 24px 16px;border-bottom:1px solid rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;border-top:4px solid var(--bd-cyan);}
+  .modal-title{font-size:16px;font-weight:600;color:var(--bd-navy);font-family:var(--font-title);}
+  .modal-body{padding:20px 24px;}
+  .modal-footer{padding:16px 24px;border-top:1px solid rgba(0,0,0,0.05);display:flex;gap:10px;justify-content:flex-end;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .form-label{font-size:10px;font-weight:600;color:var(--bd-teal);text-transform:uppercase;letter-spacing:0.06em;font-family:var(--font-title);}
+  .form-input{padding:10px 14px;border:1px solid var(--bd-gray);border-radius:10px;font-size:13px;color:var(--bd-black);outline:none;background:var(--surface);font-family:var(--font-body);transition:border-color 0.2s;}
+  .form-input:focus{border-color:var(--bd-cyan);box-shadow:0 0 0 3px rgba(10,207,222,0.12);}
+  .form-select{padding:10px 14px;border:1px solid var(--bd-gray);border-radius:10px;font-size:13px;color:var(--bd-black);outline:none;background:var(--surface);appearance:none;font-family:var(--font-body);transition:border-color 0.2s;}
+  .form-select:focus{border-color:var(--bd-cyan);box-shadow:0 0 0 3px rgba(10,207,222,0.12);}
+  .form-textarea{padding:10px 14px;border:1px solid var(--bd-gray);border-radius:10px;font-size:13px;color:var(--bd-black);outline:none;background:var(--surface);resize:vertical;min-height:80px;font-family:var(--font-body);transition:border-color 0.2s;}
+  .form-textarea:focus{border-color:var(--bd-cyan);box-shadow:0 0 0 3px rgba(10,207,222,0.12);}
+  .services-grid{display:flex;gap:8px;flex-wrap:wrap;}
+  .service-toggle{padding:6px 14px;border:1.5px solid var(--bd-gray);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;color:var(--gray);background:var(--surface);font-family:var(--font-title);}
+  .service-toggle.selected{border-color:var(--bd-teal);background:#e8f5f7;color:var(--bd-teal);}
+  .checklist-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .toggle{position:relative;width:40px;height:22px;flex-shrink:0;}
+  .toggle input{display:none;}
+  .toggle-track{width:40px;height:22px;border-radius:12px;background:var(--bd-gray);cursor:pointer;position:relative;transition:background 0.2s;display:block;}
+  .toggle-thumb{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+  input:checked + .toggle-track{background:var(--bd-teal);}
+  input:checked + .toggle-track .toggle-thumb{transform:translateX(18px);}
+  .toggle-label{font-size:13px;color:var(--bd-black);font-family:var(--font-body);}
+  .close-btn{width:30px;height:30px;border-radius:50%;border:1px solid transparent;background:transparent;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;color:var(--gray);transition:all 0.15s;}
+  .close-btn:hover{background:rgba(0,0,0,0.05);color:var(--bd-navy);}
+  .section-divider{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--bd-teal);margin:20px 0 12px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,0.05);font-family:var(--font-title);}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(3,28,45,0.5);z-index:49;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .hidden{display:none !important;}
+  @media(max-width:768px){
+    .sidebar{transform:translateX(-100%);}
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-overlay.open{display:block;}
+    .main{margin-left:0;}
+    .hamburger{display:flex;}
+    .dash-grid{grid-template-columns:1fr;}
+    .header-date{display:none;}
+  }
+</style>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-logo">
+      <img
+        src="https://bms.brandmonitor.com.br/static/image/logo_branddi_white.png?v=1777126206"
+        alt="Logo Branddi"
+        style="height:56px; width:auto; max-width:180px; display:block; object-fit:contain; margin-left:-4px;"
+      >
+      <span class="sidebar-logo-sub">Gestão de Reuniões</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Titanium</div>
+        <div class="nav-item" data-carteira="titanium1" onclick="selectCarteira(this)">
+          <div class="nav-dot" style="background:#7c3aed;"></div>Titanium 1
+        </div>
+        <div class="nav-item active" data-carteira="titanium2" onclick="selectCarteira(this)">
+          <div class="nav-dot" style="background:#0ACFDE;"></div>Titanium 2
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Black</div>
+        <div class="nav-item" data-carteira="black1" onclick="selectCarteira(this)">
+          <div class="nav-dot" style="background:#9ca3af;"></div>Black 1
+        </div>
+        <div class="nav-item" data-carteira="black2" onclick="selectCarteira(this)">
+          <div class="nav-dot" style="background:#9ca3af;"></div>Black 2
+        </div>
+        <div class="nav-item" data-carteira="black3" onclick="selectCarteira(this)">
+          <div class="nav-dot" style="background:#9ca3af;"></div>Black 3
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Platinum</div>
+        <div class="nav-item" data-carteira="platinum1" onclick="selectCarteira(this)">
+          <div class="nav-dot" style="background:#299FB1;"></div>Platinum 1
+        </div>
+        <div class="nav-item" data-carteira="platinum2" onclick="selectCarteira(this)">
+          <div class="nav-dot" style="background:#299FB1;"></div>Platinum 2
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">© Branddi · Gestão Comercial</div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="main">
+    <div class="header">
+      <div class="header-left">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+        <div>
+          <div class="header-title" id="header-title">Painel de Controle — Titanium 2</div>
+          <div class="header-sub">Cobertura de Carteira de Clientes</div>
+        </div>
+      </div>
+      <div class="header-date" id="header-date"></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="dashboard">Dashboard</div>
+      <div class="tab" data-tab="reunioes">Reuniões</div>
+    </div>
+    <div class="content">
+      <div class="metrics-row">
+        <div class="metric-card"><div class="metric-label">Total de Clientes</div><div class="metric-value" id="m-total">0</div></div>
+        <div class="metric-card"><div class="metric-label">Reuniões no Mês</div><div class="metric-value" id="m-realizadas" style="color:var(--bd-turquoise)">0</div></div>
+        <div class="metric-card">
+          <div class="metric-label">Cobertura do Mês</div>
+          <div class="metric-value" id="m-cobertura">0%</div>
+          <div class="metric-badge" id="m-badge">-</div>
+        </div>
+        <div class="metric-card"><div class="metric-label">Agendadas</div><div class="metric-value" id="m-agendadas" style="color:var(--yellow)">0</div></div>
+        <div class="metric-card"><div class="metric-label">Sugestões Enviadas</div><div class="metric-value" id="m-sugestoes" style="color:var(--gray)">0</div></div>
+      </div>
+      <div class="tab-panel active" id="tab-dashboard"><div id="dashboard-content"></div></div>
+      <div class="tab-panel" id="tab-reunioes">
+        <div class="table-toolbar">
+          <div class="search-wrap">
+            <span class="search-icon">&#128269;</span>
+            <input class="search-input" type="text" placeholder="Buscar cliente..." id="search-input" oninput="filterTable()">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select class="btn-secondary" id="filter-status" onchange="filterTable()">
+              <option value="">Todos os status</option>
+              <option value="realizada">Reunião no Mês Atual</option>
+              <option value="agendada">Apenas Agendadas</option>
+            </select>
+            <button class="btn-primary" onclick="openModal()">+ Nova Reunião</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Cliente</th><th>Última Reunião</th><th>Próxima Reunião</th>
+              <th>Recorrência</th><th>Serviços</th>
+              <th>Enviada?</th><th>Agendada?</th><th>Material?</th>
+              <th>Observações</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Nova Reunião</span>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nome do Cliente *</label><input class="form-input" type="text" id="f-nome" placeholder="Ex: Empresa ABC"></div>
+        <div class="form-group"><label class="form-label">Recorrência</label>
+          <select class="form-select" id="f-recorrencia">
+            <option>Nenhuma</option><option>Semanal</option><option>Quinzenal</option>
+            <option>Mensal</option><option>Trimestral</option><option>Recorrente</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Última Reunião</label><input class="form-input" type="date" id="f-ultima"></div>
+        <div class="form-group"><label class="form-label">Próxima Reunião</label><input class="form-input" type="date" id="f-proxima"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Serviços</label>
+        <div class="services-grid">
+          <div class="service-toggle" data-service="BB" onclick="toggleService(this)">BB</div>
+          <div class="service-toggle" data-service="VC" onclick="toggleService(this)">VC</div>
+          <div class="service-toggle" data-service="FR" onclick="toggleService(this)">FR</div>
+          <div class="service-toggle" data-service="BB 360" onclick="toggleService(this)">BB 360</div>
+          <div class="service-toggle" data-service="ASA" onclick="toggleService(this)">ASA</div>
+          <div class="service-toggle" data-service="PS" onclick="toggleService(this)">PS</div>
+          <div class="service-toggle" data-service="VM" onclick="toggleService(this)">VM</div>
+          <div class="service-toggle" data-service="Fraude" onclick="toggleService(this)">Fraude</div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Observações</label>
+        <textarea class="form-textarea" id="f-obs" placeholder="Detalhes, pautas, pendências..."></textarea>
+      </div>
+      <div class="section-divider">Checklist de Status</div>
+      <div class="checklist-row"><label class="toggle"><input type="checkbox" id="f-sugestao"><span class="toggle-track"><span class="toggle-thumb"></span></span></label><span class="toggle-label">Sugestão de reunião enviada?</span></div>
+      <div class="checklist-row"><label class="toggle"><input type="checkbox" id="f-agendada"><span class="toggle-track"><span class="toggle-thumb"></span></span></label><span class="toggle-label">Reunião agendada?</span></div>
+      <div class="checklist-row"><label class="toggle"><input type="checkbox" id="f-material"><span class="toggle-track"><span class="toggle-thumb"></span></span></label><span class="toggle-label">Material já solicitado?</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveRecord()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const CARTEIRAS={
+  titanium1:{label:'Titanium 1',records:[]},
+  titanium2:{label:'Titanium 2',records:[
+    {id:1,nome:'Flash App',ultima:'2026-03-11',proxima:'2026-04-13',recorrencia:'Mensal',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:2,nome:'Nomad',ultima:'2026-03-18',proxima:'2026-04-15',recorrencia:'Recorrente',servicos:['BB','ASA'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:3,nome:'Santander',ultima:'2025-10-22',proxima:'2026-04-16',recorrencia:'Mensal',servicos:['BB'],sugestao:false,agendada:false,material:false,obs:''},
+    {id:4,nome:'InfinitePay',ultima:'2024-11-24',proxima:'2026-04-19',recorrencia:'Mensal',servicos:['BB'],sugestao:false,agendada:false,material:false,obs:''},
+    {id:5,nome:'Ticket',ultima:'2025-11-21',proxima:'2026-04-20',recorrencia:'Mensal',servicos:['BB'],sugestao:false,agendada:true,material:false,obs:''},
+    {id:6,nome:'Itaú',ultima:'2025-11-03',proxima:'2026-04-20',recorrencia:'Mensal',servicos:['BB'],sugestao:false,agendada:false,material:false,obs:''},
+    {id:7,nome:'Ticket Log',ultima:'2025-12-16',proxima:'2026-04-21',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:8,nome:'Utua',ultima:'2025-09-15',proxima:'2026-04-22',recorrencia:'Mensal',servicos:['BB'],sugestao:true,agendada:false,material:false,obs:''},
+    {id:9,nome:'UOL Host',ultima:'2026-02-25',proxima:'2026-04-23',recorrencia:'Mensal',servicos:['BB'],sugestao:true,agendada:false,material:false,obs:''},
+    {id:10,nome:'Kaspersky',ultima:'2026-02-10',proxima:'2026-04-23',recorrencia:'Mensal',servicos:['BB','VC'],sugestao:false,agendada:false,material:false,obs:''},
+    {id:11,nome:'DHL',ultima:'2026-04-17',proxima:'2026-04-24',recorrencia:'Recorrente',servicos:['BB','VC'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:12,nome:'Pagar.me',ultima:'2026-03-27',proxima:'2026-04-24',recorrencia:'Mensal',servicos:['BB'],sugestao:false,agendada:false,material:false,obs:''},
+    {id:13,nome:'Embracon',ultima:'2026-04-20',proxima:'2026-04-27',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:14,nome:'Serasa',ultima:'2026-03-23',proxima:'2026-04-27',recorrencia:'Recorrente',servicos:['BB','Fraude'],sugestao:true,agendada:true,material:false,obs:''},
+    {id:15,nome:'CVC',ultima:'2026-04-14',proxima:'2026-04-28',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:16,nome:'Copastur',ultima:'2026-03-17',proxima:'2026-04-28',recorrencia:'Recorrente',servicos:['BB','Fraude'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:17,nome:'Grupo Elopar',ultima:'2026-04-15',proxima:'2026-04-28',recorrencia:'Mensal',servicos:['BB','ASA'],sugestao:true,agendada:false,material:false,obs:'SOLICITAR ASSESSMENT PARA REUNIÃO DE 28/04'},
+    {id:18,nome:'Acordo Certo',ultima:'2026-03-19',proxima:'2026-04-28',recorrencia:'Mensal',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:19,nome:'Azul Linhas Aéreas',ultima:'2026-03-12',proxima:'2026-04-29',recorrencia:'Mensal',servicos:['BB','Fraude','VM'],sugestao:true,agendada:false,material:false,obs:''},
+    {id:20,nome:'iClinic',ultima:'2026-02-26',proxima:'2026-04-30',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:false,obs:''},
+    {id:21,nome:'Picpay',ultima:'2025-09-23',proxima:'2026-04-30',recorrencia:'Mensal',servicos:['BB','ASA','PS'],sugestao:false,agendada:false,material:true,obs:''},
+    {id:22,nome:'Banco Inter',ultima:'2026-04-09',proxima:'2026-05-01',recorrencia:'Recorrente',servicos:['BB 360'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:23,nome:'Omie',ultima:'2026-04-09',proxima:'2026-05-07',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:24,nome:'Conta Simples',ultima:'2026-04-02',proxima:'2026-05-07',recorrencia:'Recorrente',servicos:['BB','Fraude'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:25,nome:'Toro Investimentos',ultima:'2026-04-10',proxima:'2026-05-08',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:26,nome:'C6 Bank',ultima:'2026-04-13',proxima:'2026-05-11',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:27,nome:'Crefaz',ultima:'2026-04-14',proxima:'2026-05-12',recorrencia:'Recorrente',servicos:['BB','Fraude'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:28,nome:'Santander Financiamentos',ultima:'2026-04-14',proxima:'2026-05-12',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:'SOLICITAR ASSESSMENT PARA REUNIÃO DE MAIO'},
+    {id:29,nome:'Beach Park',ultima:'2026-04-09',proxima:'2026-05-14',recorrencia:'Recorrente',servicos:['BB','Fraude'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:30,nome:'Banco BV',ultima:'2026-04-08',proxima:'2026-05-14',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:false,material:false,obs:''},
+    {id:31,nome:'Gol & Smiles',ultima:'2026-04-08',proxima:'2026-05-14',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:false,material:false,obs:''},
+    {id:32,nome:'XP Inc. (XP e Rico)',ultima:'2026-04-02',proxima:'2026-05-14',recorrencia:'Mensal',servicos:['BB'],sugestao:true,agendada:false,material:true,obs:''},
+    {id:33,nome:'XP Inc. (Modal/Clear)',ultima:'2025-12-05',proxima:'2026-05-14',recorrencia:'Mensal',servicos:['BB'],sugestao:true,agendada:false,material:true,obs:''},
+    {id:34,nome:'Stone Company',ultima:'2026-04-17',proxima:'2026-05-15',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:35,nome:'Cielo',ultima:'2026-04-15',proxima:'2026-05-20',recorrencia:'Recorrente',servicos:['BB'],sugestao:true,agendada:true,material:true,obs:''},
+    {id:36,nome:'Medcel',ultima:'',proxima:'',recorrencia:'Nenhuma',servicos:['VM'],sugestao:false,agendada:false,material:false,obs:''},
+  ]},
+  black1:{label:'Black 1',records:[]},black2:{label:'Black 2',records:[]},black3:{label:'Black 3',records:[]},
+  platinum1:{label:'Platinum 1',records:[]},platinum2:{label:'Platinum 2',records:[]}
+};
+Object.keys(CARTEIRAS).forEach(k=>{CARTEIRAS[k].records=JSON.parse(JSON.stringify(CARTEIRAS[k].records));CARTEIRAS[k]._nextId=CARTEIRAS[k].records.length+1;});
+let currentCarteira='titanium2',gaugeChartInst=null,servicosChartInst=null;
+function carteira(){return CARTEIRAS[currentCarteira];}
+function records(){return carteira().records;}
+function formatDate(d){if(!d)return'—';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;}
+function dateClass(d){if(!d)return'';const t=new Date();t.setHours(0,0,0,0);const dt=new Date(d+'T00:00:00');const diff=(dt-t)/86400000;return diff<0?'date-past':diff<=7?'date-soon':'date-ok';}
+function serviceTag(s){const c={'BB':'tag-blue','VC':'tag-teal','FR':'tag-purple','BB 360':'tag-orange','ASA':'tag-pink','PS':'tag-gray2','VM':'tag-gray2','Fraude':'tag-gray2'};return`<span class="tag ${c[s]||'tag-blue'}">${s}</span>`;}
+function checkIcon(v){return v?`<span class="check-icon check-yes">✓</span>`:`<span class="check-icon check-no">—</span>`;}
+function computeMetrics(){const now=new Date();const cm=now.getMonth(),cy=now.getFullYear();const recs=records();const total=recs.length;const realizadas=recs.filter(r=>{if(!r.ultima)return false;const d=new Date(r.ultima+'T00:00:00');return d.getMonth()===cm&&d.getFullYear()===cy;}).length;const cobertura=total>0?Math.round((realizadas/total)*100):0;return{total,realizadas,cobertura,agendadas:recs.filter(r=>r.agendada).length,sugestoes:recs.filter(r=>r.sugestao).length};}
+function gaugeColor(p){return p>=75?'#2e7d32':p>=50?'#f57f17':'#c62828';}
+function updateHeader(){document.getElementById('header-title').textContent=`Painel de Controle — ${carteira().label}`;}
+function updateMetrics(){const m=computeMetrics();document.getElementById('m-total').textContent=m.total;document.getElementById('m-realizadas').textContent=m.realizadas;document.getElementById('m-cobertura').textContent=m.cobertura+'%';document.getElementById('m-agendadas').textContent=m.agendadas;document.getElementById('m-sugestoes').textContent=m.sugestoes;const b=document.getElementById('m-badge');if(m.cobertura>=75){b.textContent='▲ Bom';b.className='metric-badge badge-green';}else if(m.cobertura>=50){b.textContent='◆ Atenção';b.className='metric-badge badge-yellow';}else{b.textContent='▼ Crítico';b.className='metric-badge badge-red';}}
+function renderDashboard(){const recs=records();const m=computeMetrics();const pct=m.cobertura;const color=gaugeColor(pct);if(recs.length===0){document.getElementById('dashboard-content').innerHTML=`<div class="empty-carteira"><div class="empty-icon">📋</div><div class="empty-title">Carteira sem dados</div><div class="empty-sub">A carteira <strong>${carteira().label}</strong> ainda não possui registros. Acesse a aba <em>Reuniões</em> para adicionar clientes.</div></div>`;return;}
+document.getElementById('dashboard-content').innerHTML=`<div class="dash-grid"><div class="card"><div class="card-header"><span class="card-title">Termômetro de Cobertura</span><span class="card-tag" id="mes-label"></span></div><div class="card-body"><div class="gauge-wrap"><div style="position:relative;width:100%;height:170px;"><canvas id="gaugeChart"></canvas></div><div class="gauge-pct" style="color:${color}">${pct}%</div><div class="gauge-sub">de cobertura da carteira</div><div class="gauge-bar" style="margin-top:6px;"><div class="gauge-fill" style="width:${pct}%;background:${color};"></div></div><div class="gauge-legend"><div class="gauge-leg-item"><div class="dot" style="background:#c62828;"></div>Crítico (0–49%)</div><div class="gauge-leg-item"><div class="dot" style="background:#f57f17;"></div>Atenção (50–74%)</div><div class="gauge-leg-item"><div class="dot" style="background:#2e7d32;"></div>Bom (75–100%)</div></div></div></div></div><div style="display:flex;flex-direction:column;gap:16px;"><div class="card"><div class="card-header"><span class="card-title">Status das Reuniões</span></div><div class="card-body"><div class="status-list" id="status-list"></div></div></div><div class="card"><div class="card-header"><span class="card-title">Serviços em Pauta</span></div><div class="card-body"><div style="position:relative;width:100%;height:150px;"><canvas id="servicosChart"></canvas></div></div></div></div></div>`;
+document.getElementById('mes-label').textContent=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
+if(gaugeChartInst)gaugeChartInst.destroy();
+gaugeChartInst=new Chart(document.getElementById('gaugeChart').getContext('2d'),{type:'doughnut',data:{datasets:[{data:[pct,100-pct,100],backgroundColor:[color,'#E6E6E6','rgba(0,0,0,0)'],borderWidth:0,circumference:180,rotation:270}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:900,easing:'easeInOutQuart'}}});
+const items=[{label:'Reuniões no mês atual',val:m.realizadas,color:'#177A8B'},{label:'Sugestões enviadas',val:m.sugestoes,color:'#299FB1'},{label:'Reuniões agendadas',val:m.agendadas,color:'#f57f17'},{label:'Material solicitado',val:recs.filter(r=>r.material).length,color:'#2e7d32'}];
+document.getElementById('status-list').innerHTML=items.map(i=>{const p=m.total>0?Math.round((i.val/m.total)*100):0;return`<div class="status-row"><span class="status-label">${i.label}</span><div class="status-bar-wrap"><div class="status-bar" style="width:${p}%;background:${i.color};"></div></div><span class="status-count">${i.val}</span></div>`;}).join('');
+if(servicosChartInst)servicosChartInst.destroy();
+const counts={};recs.forEach(r=>r.servicos.forEach(s=>{counts[s]=(counts[s]||0)+1;}));const labels=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+// PALETA BRANDDI OFICIAL APLICADA AQUI
+const palette=['#031C2D','#177A8B','#299FB1','#0ACFDE','#1F1F1F','#E6E6E6'];
+servicosChartInst=new Chart(document.getElementById('servicosChart').getContext('2d'),{type:'bar',data:{labels,datasets:[{data:labels.map(l=>counts[l]),backgroundColor:labels.map((_,i)=>palette[i%palette.length]),borderRadius:6,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} clientes`}}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:12}},grid:{display:false}}}}});}
+function renderTable(data){const tbody=document.getElementById('table-body');if(!data||!data.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--gray);">Nenhum registro encontrado.</td></tr>`;return;}tbody.innerHTML=data.map(r=>{const initials=r.nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();return`<tr><td><div class="name-cell"><div class="avatar">${initials}</div><span class="client-name">${r.nome}</span></div></td><td class="date-cell">${formatDate(r.ultima)}</td><td class="date-cell ${dateClass(r.proxima)}">${formatDate(r.proxima)}</td><td><span class="recorrencia">${r.recorrencia}</span></td><td>${r.servicos.map(serviceTag).join('')}</td><td>${checkIcon(r.sugestao)}</td><td>${checkIcon(r.agendada)}</td><td>${checkIcon(r.material)}</td><td><div class="obs-cell" title="${r.obs}">${r.obs||'—'}</div></td><td><div class="actions"><button class="btn-icon" onclick="editRecord(${r.id})">✏️</button><button class="btn-icon" onclick="deleteRecord(${r.id})" style="color:var(--red)">🗑</button></div></td></tr>`;}).join('');}
+function filterTable(){const now=new Date();const q=document.getElementById('search-input').value.toLowerCase();const s=document.getElementById('filter-status').value;let data=records();if(q)data=data.filter(r=>r.nome.toLowerCase().includes(q));if(s==='realizada')data=data.filter(r=>{if(!r.ultima)return false;const d=new Date(r.ultima+'T00:00:00');return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});if(s==='agendada')data=data.filter(r=>r.agendada);renderTable(data);}
+function refreshAll(){updateHeader();updateMetrics();renderDashboard();filterTable();}
+function selectCarteira(el){currentCarteira=el.dataset.carteira;document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));el.classList.add('active');document.getElementById('search-input').value='';document.getElementById('filter-status').value='';closeSidebar();refreshAll();}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('open');}
+document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));tab.classList.add('active');document.getElementById('tab-'+tab.dataset.tab).classList.add('active');if(tab.dataset.tab==='dashboard')setTimeout(()=>renderDashboard(),50);});});
+function openModal(id){document.getElementById('modal-overlay').classList.remove('hidden');document.querySelectorAll('.service-toggle').forEach(el=>el.classList.remove('selected'));if(id){const r=records().find(x=>x.id===id);document.getElementById('modal-title').textContent='Editar Reunião';document.getElementById('edit-id').value=id;document.getElementById('f-nome').value=r.nome;document.getElementById('f-recorrencia').value=r.recorrencia;document.getElementById('f-ultima').value=r.ultima;document.getElementById('f-proxima').value=r.proxima;document.getElementById('f-obs').value=r.obs;document.getElementById('f-sugestao').checked=r.sugestao;document.getElementById('f-agendada').checked=r.agendada;document.getElementById('f-material').checked=r.material;r.servicos.forEach(s=>{const el=document.querySelector(`.service-toggle[data-service="${s}"]`);if(el)el.classList.add('selected');});}else{document.getElementById('modal-title').textContent='Nova Reunião';['edit-id','f-nome','f-ultima','f-proxima','f-obs'].forEach(id=>document.getElementById(id).value='');document.getElementById('f-recorrencia').value='Mensal';['f-sugestao','f-agendada','f-material'].forEach(id=>document.getElementById(id).checked=false);}}
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');}
+function toggleService(el){el.classList.toggle('selected');}
+function getSelectedServices(){return Array.from(document.querySelectorAll('.service-toggle.selected')).map(el=>el.dataset.service);}
+function saveRecord(){const nome=document.getElementById('f-nome').value.trim();if(!nome){alert('Informe o nome do cliente.');return;}const rec={nome,recorrencia:document.getElementById('f-recorrencia').value,ultima:document.getElementById('f-ultima').value,proxima:document.getElementById('f-proxima').value,servicos:getSelectedServices(),obs:document.getElementById('f-obs').value.trim(),sugestao:document.getElementById('f-sugestao').checked,agendada:document.getElementById('f-agendada').checked,material:document.getElementById('f-material').checked};const editId=parseInt(document.getElementById('edit-id').value);const recs=carteira().records;if(editId){const idx=recs.findIndex(r=>r.id===editId);recs[idx]={...rec,id:editId};}else{rec.id=carteira()._nextId++;recs.push(rec);}closeModal();refreshAll();}
+function editRecord(id){openModal(id);}
+function deleteRecord(id){if(!confirm('Remover este registro?'))return;carteira().records=carteira().records.filter(r=>r.id!==id);refreshAll();}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('header-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+refreshAll();
+</script>
