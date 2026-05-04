@@ -297,6 +297,37 @@
   .kpi-coming-title { font-size:22px; font-weight:600; color:var(--bd-navy); font-family:var(--font-title); }
   .kpi-coming-sub { font-size:14px; color:var(--gray); max-width:360px; line-height:1.6; font-family:var(--font-body); }
   .kpi-coming-badge { background:var(--brand-blue-light); color:var(--bd-teal); font-size:11px; font-weight:600; padding:5px 14px; border-radius:20px; font-family:var(--font-title); letter-spacing:0.05em; }
+  /* ── KPI CHURN ── */
+  .churn-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:24px; padding:6px; background:#fff; border:1px solid var(--bd-line); border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .churn-tab { padding:10px 18px; font-size:13px; font-weight:500; color:var(--gray); cursor:pointer; border-radius:8px; transition:all 0.15s; font-family:var(--font-body); white-space:nowrap; }
+  .churn-tab:hover { background:var(--brand-blue-light); color:var(--bd-teal); }
+  .churn-tab.active { background:var(--bd-navy); color:#fff; font-weight:600; font-family:var(--font-title); }
+  .churn-tab-count { display:inline-block; margin-left:8px; padding:1px 8px; border-radius:10px; background:rgba(255,255,255,0.18); font-size:11px; font-weight:600; }
+  .churn-tab:not(.active) .churn-tab-count { background:var(--brand-blue-light); color:var(--bd-teal); }
+  .churn-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:24px; }
+  .churn-summary-card { background:#fff; border:1px solid var(--bd-line); border-radius:12px; padding:18px 20px; box-shadow:0 1px 3px rgba(0,0,0,0.04); display:flex; flex-direction:column; gap:6px; }
+  .churn-summary-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--gray); font-family:var(--font-title); }
+  .churn-summary-val { font-size:32px; font-weight:600; font-family:var(--font-title); line-height:1; }
+  .churn-summary-pct { font-size:13px; font-weight:500; color:var(--gray); font-family:var(--font-body); }
+  .churn-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  @media (max-width:900px){ .churn-grid { grid-template-columns:1fr; } }
+  .churn-col { background:#fff; border:1px solid var(--bd-line); border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); overflow:hidden; display:flex; flex-direction:column; }
+  .churn-col-header { padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid var(--bd-line); }
+  .churn-col-title { font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; font-family:var(--font-title); display:flex; align-items:center; gap:8px; }
+  .churn-col-dot { width:10px; height:10px; border-radius:50%; }
+  .churn-col-pct { font-size:18px; font-weight:600; font-family:var(--font-title); }
+  .churn-col-count { font-size:11px; color:var(--gray); font-family:var(--font-body); }
+  .churn-col-baixo .churn-col-dot, .churn-col-baixo .churn-col-title, .churn-col-baixo .churn-col-pct { color:var(--green); }
+  .churn-col-baixo .churn-col-dot { background:var(--green); }
+  .churn-col-medio .churn-col-dot, .churn-col-medio .churn-col-title, .churn-col-medio .churn-col-pct { color:var(--yellow); }
+  .churn-col-medio .churn-col-dot { background:var(--yellow); }
+  .churn-col-alto  .churn-col-dot, .churn-col-alto  .churn-col-title, .churn-col-alto  .churn-col-pct { color:var(--red); }
+  .churn-col-alto  .churn-col-dot { background:var(--red); }
+  .churn-list { list-style:none; padding:8px 0; margin:0; flex:1; max-height:520px; overflow-y:auto; }
+  .churn-list li { padding:10px 18px; font-size:13px; color:var(--bd-navy); font-family:var(--font-body); border-bottom:1px solid var(--bd-line); display:flex; align-items:center; gap:8px; }
+  .churn-list li:last-child { border-bottom:none; }
+  .churn-list li::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; opacity:0.35; flex-shrink:0; }
+  .churn-list-empty { padding:24px 18px; font-size:12px; color:var(--gray); font-style:italic; text-align:center; font-family:var(--font-body); }
   .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(3,28,45,0.5);z-index:49;}
   .tab-panel{display:none;}
   .tab-panel.active{display:block;}
@@ -463,12 +494,7 @@
 
       <!-- ── KPI: CHURN ── -->
       <div class="kpi-page" id="kpi-churn">
-        <div class="kpi-coming-soon">
-          <div class="kpi-coming-icon">📉</div>
-          <div class="kpi-coming-title">KPI de Churn</div>
-          <div class="kpi-coming-sub">Aqui serão exibidas as métricas de churn, clientes em processo de saída e análise de retenção por carteira.</div>
-          <div class="kpi-coming-badge">EM BREVE</div>
-        </div>
+        <div id="churn-content"></div>
       </div>
 
   </div>
@@ -594,6 +620,10 @@ let APROVACOES_DATA = {
   ]
 };
 
+/* ── DADOS DE CHURN (aba CLIENTES) ── */
+let CHURN_DATA = { porCarteira: {} }; // { 'Titanium 1': [{campanha, score:'baixo'|'medio'|'alto'}, ...], ... }
+let currentChurnCarteira = null;
+
 /* ── SUPABASE ── */
 const SUPA_URL = 'https://hzubtvnwuhrgfriajuun.supabase.co';
 const SUPA_KEY = 'sb_publishable_DIyL6cTxYKV1AngQytGi2w_92ufUVlp';
@@ -639,6 +669,8 @@ async function dbLoadAll() {
   });
   const { data: aprov } = await db.from('aprovacoes_snapshot').select('data').eq('id', 1).maybeSingle();
   if (aprov) APROVACOES_DATA = aprov.data;
+  const { data: churnSnap } = await db.from('churn_snapshot').select('data').eq('id', 1).maybeSingle();
+  if (churnSnap && churnSnap.data) CHURN_DATA = churnSnap.data;
 }
 
 async function dbSeedAll() {
@@ -663,6 +695,11 @@ async function dbDeleteRecord(carteiraKey, id) {
 async function dbSaveAprovacoes() {
   const { error } = await db.from('aprovacoes_snapshot').upsert({ id: 1, data: APROVACOES_DATA, updated_at: new Date().toISOString() });
   if (error) console.error('Erro ao salvar aprovações:', error);
+}
+
+async function dbSaveChurn() {
+  const { error } = await db.from('churn_snapshot').upsert({ id: 1, data: CHURN_DATA, updated_at: new Date().toISOString() });
+  if (error) console.error('Erro ao salvar churn:', error);
 }
 
 function pct(v){return Math.round(v*100)+'%';}
@@ -721,6 +758,100 @@ function renderAprovacoes(){
     <div class="aprov-grid">${cardsHTML}</div>`;
 }
 
+/* ── RENDER CHURN ── */
+const CHURN_CARTEIRA_ORDEM = ['Black 1','Black 2','Black 3','Titanium 1','Titanium 2','Platinum 1','Platinum 2'];
+
+function renderChurn(){
+  const container = document.getElementById('churn-content');
+  if(!container) return;
+  const data = CHURN_DATA && CHURN_DATA.porCarteira ? CHURN_DATA.porCarteira : {};
+  const carteirasComDados = CHURN_CARTEIRA_ORDEM.filter(c => data[c] && data[c].length > 0);
+
+  if(carteirasComDados.length === 0){
+    container.innerHTML = `<div class="kpi-coming-soon">
+      <div class="kpi-coming-icon">📉</div>
+      <div class="kpi-coming-title">Nenhum dado carregado</div>
+      <div class="kpi-coming-sub">Importe a Planilha Master para visualizar os KPIs de Churn por carteira.</div>
+    </div>`;
+    return;
+  }
+
+  if(!currentChurnCarteira || !carteirasComDados.includes(currentChurnCarteira)){
+    currentChurnCarteira = carteirasComDados[0];
+  }
+
+  const tabsHTML = carteirasComDados.map(c => {
+    const total = data[c].length;
+    const ativa = c === currentChurnCarteira;
+    return `<div class="churn-tab ${ativa?'active':''}" onclick="selectChurnCarteira('${c.replace(/'/g,"\\'")}')">${c}<span class="churn-tab-count">${total}</span></div>`;
+  }).join('');
+
+  const lista = data[currentChurnCarteira] || [];
+  const total = lista.length;
+  const buckets = { baixo:[], medio:[], alto:[] };
+  lista.forEach(item => {
+    const k = (item.score || '').toLowerCase();
+    if(buckets[k]) buckets[k].push(item.campanha);
+  });
+  // ordena alfabeticamente
+  Object.values(buckets).forEach(arr => arr.sort((a,b)=>a.localeCompare(b,'pt-BR')));
+
+  const fmtPct = n => total ? Math.round((n/total)*100)+'%' : '0%';
+
+  const colHTML = (key, label) => {
+    const arr = buckets[key];
+    const itensHTML = arr.length
+      ? `<ul class="churn-list">${arr.map(nome => `<li>${nome}</li>`).join('')}</ul>`
+      : `<div class="churn-list-empty">Nenhum cliente</div>`;
+    return `<div class="churn-col churn-col-${key}">
+      <div class="churn-col-header">
+        <div class="churn-col-title"><span class="churn-col-dot"></span>${label}</div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+          <div class="churn-col-pct">${fmtPct(arr.length)}</div>
+          <div class="churn-col-count">${arr.length} de ${total}</div>
+        </div>
+      </div>
+      ${itensHTML}
+    </div>`;
+  };
+
+  container.innerHTML = `
+    <div class="churn-tabs">${tabsHTML}</div>
+    <div class="churn-summary">
+      <div class="churn-summary-card">
+        <div class="churn-summary-label">Carteira</div>
+        <div class="churn-summary-val" style="color:var(--bd-navy)">${currentChurnCarteira}</div>
+        <div class="churn-summary-pct">${total} cliente(s) ativo(s)</div>
+      </div>
+      <div class="churn-summary-card">
+        <div class="churn-summary-label">Baixo Risco</div>
+        <div class="churn-summary-val" style="color:var(--green)">${buckets.baixo.length}</div>
+        <div class="churn-summary-pct">${fmtPct(buckets.baixo.length)} da carteira</div>
+      </div>
+      <div class="churn-summary-card">
+        <div class="churn-summary-label">Médio Risco</div>
+        <div class="churn-summary-val" style="color:var(--yellow)">${buckets.medio.length}</div>
+        <div class="churn-summary-pct">${fmtPct(buckets.medio.length)} da carteira</div>
+      </div>
+      <div class="churn-summary-card">
+        <div class="churn-summary-label">Alto Risco</div>
+        <div class="churn-summary-val" style="color:var(--red)">${buckets.alto.length}</div>
+        <div class="churn-summary-pct">${fmtPct(buckets.alto.length)} da carteira</div>
+      </div>
+    </div>
+    <div class="churn-grid">
+      ${colHTML('baixo','Baixo')}
+      ${colHTML('medio','Médio')}
+      ${colHTML('alto','Alto')}
+    </div>
+  `;
+}
+
+function selectChurnCarteira(carteira){
+  currentChurnCarteira = carteira;
+  renderChurn();
+}
+
 function getViewDate(){
   const now=new Date();
   if(viewMonth==='anterior'){
@@ -744,6 +875,7 @@ function selectKpi(el){
   document.querySelectorAll('.kpi-page').forEach(p=>p.classList.remove('active'));
   document.getElementById('kpi-'+kpi).classList.add('active');
   if(kpi==='aprovacoes') renderAprovacoes();
+  if(kpi==='churn') renderChurn();
   const isReunioes = kpi === 'reunioes';
   document.getElementById('carteiras-nav').style.display = isReunioes ? '' : 'none';
   document.getElementById('month-toggle-wrap').style.display = isReunioes ? '' : 'none';
@@ -840,36 +972,169 @@ function importarPlanilha(event) {
       // ── Lê aba KPI diário para Aprovações ──
       if(workbook.SheetNames.includes('KPI diário')){
         const wsKpi = workbook.Sheets['KPI diário'];
-        // Estrutura da aba (índices 0-based do array):
-        //   row[0]  = "Ajuda" (linha auxiliar - vira cabeçalho com header:1)
-        //   row[1]  = cabeçalhos (Carteiras, Clientes...)
-        //   row[2..8] = dados por carteira (Black 1 .. Platinum 2)
-        //   row[11] = cabeçalhos consolidado
-        //   row[12..14] = consolidado (Black, Titanium, Platinum)
         const kpiRows = XLSX.utils.sheet_to_json(wsKpi, {header:1, defval:''});
-        const newCarteiras = [];
-        for(let i=2;i<=8;i++){
-          const r = kpiRows[i];
-          if(!r||!r[1]) continue;
-          const carteira = String(r[1]).trim();
-          if(!carteira||carteira==='nan') continue;
-          const toNum = v => (v===''||v===null||v===undefined)?0:Number(v)||0;
-          newCarteiras.push({
-            carteira, clientes:toNum(r[2]),
-            qtd_atraso:toNum(r[3]), pct_atraso:toNum(r[4]),
-            qtd_sem_ag:toNum(r[5]), pct_sem_ag:toNum(r[6]),
-            qtd_sem_resp:toNum(r[7]), pct_sem_resp:toNum(r[8])
+
+        // Helper para quantidades inteiras (clientes, qtd_atraso, etc.)
+        const toInt = v => {
+          if(v===''||v===null||v===undefined) return 0;
+          if(typeof v === 'number') return Math.round(v);
+          const n = parseFloat(String(v).replace(',', '.'));
+          return isNaN(n) ? 0 : Math.round(n);
+        };
+        // Helper para porcentagens — sempre retorna FRAÇÃO (0..1)
+        // Aceita: 0.2727 / "27,27%" / "27.27%" / 27.27 / "27,27"
+        const toPct = v => {
+          if(v===''||v===null||v===undefined) return 0;
+          if(typeof v === 'number'){
+            // Se já é fração (<=1) usa direto; se é >1 (ex.: 27.27) divide por 100
+            return v > 1 ? v/100 : v;
+          }
+          const raw = String(v).trim();
+          const hasPercent = raw.includes('%');
+          const n = parseFloat(raw.replace('%','').replace(',', '.'));
+          if(isNaN(n)) return 0;
+          if(hasPercent) return n/100;          // "27,27%" -> 0.2727
+          return n > 1 ? n/100 : n;             // 27.27 -> 0.2727 ; 0.2727 -> 0.2727
+        };
+        const norm = s => String(s||'')
+          .toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // remove acentos
+          .replace(/\s+/g,' ').trim();
+
+        // Localiza linha de cabeçalho da tabela por carteira:
+        // procura a linha que contenha "Carteira" (ou "Carteiras")
+        let headerIdx = -1;
+        for(let i=0;i<Math.min(kpiRows.length,15);i++){
+          const row = kpiRows[i] || [];
+          if(row.some(c => {
+            const n = norm(c);
+            return n === 'carteira' || n === 'carteiras';
+          })){ headerIdx = i; break; }
+        }
+
+        // Mapa coluna→índice baseado no cabeçalho
+        let idxCarteira=-1, idxClientes=-1,
+            idxQtdAtraso=-1, idxPctAtraso=-1,
+            idxQtdSemAg=-1, idxPctSemAg=-1,
+            idxQtdSemResp=-1, idxPctSemResp=-1;
+
+        if(headerIdx >= 0){
+          const header = kpiRows[headerIdx];
+
+          // PASSO 1: identificar primeiro as colunas de QUANTIDADE (mais específicas, têm "qtd")
+          header.forEach((cell, idx) => {
+            const n = norm(cell);
+            if(!n) return;
+            if(n==='carteira' || n==='carteiras'){ idxCarteira = idx; return; }
+            if(n==='clientes' || (n.includes('cliente') && !n.includes('resposta') && !n.includes('sem'))){
+              if(idxClientes===-1) idxClientes = idx; return;
+            }
+            // Quantidades: precisam ter "qtd" no nome
+            if(n.includes('qtd')){
+              if(n.includes('sem resposta') || n.includes('s/ resposta') || n.includes('s/resposta')){
+                if(idxQtdSemResp===-1) idxQtdSemResp = idx;
+              } else if(n.includes('sem agressor') || n.includes('s/ agressor') || n.includes('s/agressor')){
+                if(idxQtdSemAg===-1) idxQtdSemAg = idx;
+              } else if(n.includes('atraso')){
+                if(idxQtdAtraso===-1) idxQtdAtraso = idx;
+              }
+            }
+          });
+
+          // PASSO 2: identificar as colunas de PORCENTAGEM (sem "qtd", normalmente com "%" ou "atraso")
+          header.forEach((cell, idx) => {
+            const n = norm(cell);
+            if(!n) return;
+            // Pula colunas já identificadas como qtd/carteira/clientes
+            if(idx===idxCarteira || idx===idxClientes) return;
+            if(idx===idxQtdAtraso || idx===idxQtdSemAg || idx===idxQtdSemResp) return;
+            if(n.includes('qtd')) return;
+
+            // ⭐ COLUNA-CHAVE: "Atraso sem resposta cliente" (col. I) -> pct_sem_resp
+            if((n.includes('sem resposta') || n.includes('s/ resposta') || n.includes('s/resposta'))
+               && idxPctSemResp===-1){
+              idxPctSemResp = idx; return;
+            }
+            if((n.includes('sem agressor') || n.includes('s/ agressor') || n.includes('s/agressor'))
+               && idxPctSemAg===-1){
+              idxPctSemAg = idx; return;
+            }
+            if((n==='em atraso' || n==='atraso' || n==='% atraso' || n==='% em atraso'
+                || (n.includes('atraso') && !n.includes('sem') && !n.includes('s/')))
+               && idxPctAtraso===-1){
+              idxPctAtraso = idx; return;
+            }
           });
         }
-        const newCons = [];
-        for(let i=12;i<=14;i++){
+
+        // Fallback para os índices fixos antigos caso o cabeçalho não seja encontrado
+        if(idxCarteira===-1)    idxCarteira    = 1;
+        if(idxClientes===-1)    idxClientes    = 2;
+        if(idxQtdAtraso===-1)   idxQtdAtraso   = 3;
+        if(idxPctAtraso===-1)   idxPctAtraso   = 4;
+        if(idxQtdSemAg===-1)    idxQtdSemAg    = 5;
+        if(idxPctSemAg===-1)    idxPctSemAg    = 6;
+        if(idxQtdSemResp===-1)  idxQtdSemResp  = 7;
+        if(idxPctSemResp===-1)  idxPctSemResp  = 8; // Coluna I
+
+        // ⚠️ TRAVA: pct_sem_resp NUNCA pode ser igual a qtd_sem_resp.
+        // Se colidir (cabeçalho ambíguo), assume a coluna seguinte (a % vem logo após a qtd).
+        if(idxPctSemResp === idxQtdSemResp) idxPctSemResp = idxQtdSemResp + 1;
+        if(idxPctSemAg   === idxQtdSemAg)   idxPctSemAg   = idxQtdSemAg + 1;
+        if(idxPctAtraso  === idxQtdAtraso)  idxPctAtraso  = idxQtdAtraso + 1;
+
+        const startData = headerIdx>=0 ? headerIdx+1 : 2;
+        const newCarteiras = [];
+
+        // Lê dados das carteiras (até encontrar linha vazia ou bloco de consolidado)
+        for(let i=startData; i<kpiRows.length; i++){
           const r = kpiRows[i];
-          if(!r||!r[1]) continue;
-          const grupo = String(r[1]).trim();
-          if(!grupo||grupo==='nan') continue;
-          const toNum = v => (v===''||v===null||v===undefined)?0:Number(v)||0;
-          newCons.push({grupo, pct_total:toNum(r[2]), pct_sem_ag:toNum(r[3]), pct_sem_resp:toNum(r[4])});
+          if(!r) continue;
+          const carteira = String(r[idxCarteira]||'').trim();
+          if(!carteira || carteira==='nan') {
+            // Se já lemos pelo menos uma carteira e bateu vazio, paramos
+            if(newCarteiras.length>0) break;
+            continue;
+          }
+          // Para não invadir o bloco do consolidado (Black/Titanium/Platinum sem número)
+          const cn = norm(carteira);
+          if(cn==='black' || cn==='titanium' || cn==='platinum') break;
+
+          newCarteiras.push({
+            carteira,
+            clientes:    toInt(r[idxClientes]),
+            qtd_atraso:  toInt(r[idxQtdAtraso]),
+            pct_atraso:  toPct(r[idxPctAtraso]),
+            qtd_sem_ag:  toInt(r[idxQtdSemAg]),
+            pct_sem_ag:  toPct(r[idxPctSemAg]),
+            qtd_sem_resp:toInt(r[idxQtdSemResp]),
+            // ⭐ Valor da coluna "Atraso sem resposta cliente"
+            pct_sem_resp:toPct(r[idxPctSemResp])
+          });
         }
+
+        // Bloco consolidado: procura linha cujo primeiro/segundo campo seja Black/Titanium/Platinum
+        const newCons = [];
+        const grupos = ['black','titanium','platinum'];
+        for(let i=0;i<kpiRows.length;i++){
+          const r = kpiRows[i];
+          if(!r) continue;
+          // testa coluna do nome (mesmo idxCarteira do cabeçalho)
+          const candidate = norm(r[idxCarteira]) || norm(r[1]) || norm(r[0]);
+          if(grupos.includes(candidate)){
+            const grupo = candidate.charAt(0).toUpperCase()+candidate.slice(1);
+            // Para consolidado o layout é: grupo, pct_total, pct_sem_ag, pct_sem_resp
+            // Tentamos primeiro a posição relativa ao idxCarteira
+            const base = idxCarteira;
+            newCons.push({
+              grupo,
+              pct_total:    toPct(r[base+1]),
+              pct_sem_ag:   toPct(r[base+2]),
+              pct_sem_resp: toPct(r[base+3])
+            });
+          }
+        }
+
         if(newCarteiras.length) APROVACOES_DATA = {carteiras:newCarteiras, consolidado:newCons};
       }
 
@@ -894,11 +1159,47 @@ function importarPlanilha(event) {
 
       // Mapeamento de colunas (índice 0-based):
       // Coluna D = índice 3  → Campanha
+      // Coluna E = índice 4  → Situação (filtro de Churn)
+      // Coluna F = índice 5  → Categoria (carteira do cliente, p/ Churn)
+      // Coluna I = índice 8  → CHURNSCORE (texto: Baixo/Médio/Alto)
       // Coluna AE = índice 30 → Última Reunião
       // Coluna AF = índice 31 → Próxima Reunião
-      const COL_CAMPANHA = 3;
-      const COL_ULTIMA   = 30;
-      const COL_PROXIMA  = 31;
+      const COL_CAMPANHA  = 3;
+      const COL_SITUACAO  = 4;
+      const COL_CATEGORIA = 5;
+      let   COL_CHURNSCORE = 8; // pode ser sobrescrito se acharmos pelo cabeçalho
+      const COL_ULTIMA    = 30;
+      const COL_PROXIMA   = 31;
+
+      // Tenta localizar CHURNSCORE pelo cabeçalho (linha 0); se não achar, mantém coluna I
+      const headerClientes = rows[0] || [];
+      for(let i=0;i<headerClientes.length;i++){
+        const h = String(headerClientes[i]||'')
+          .toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+          .replace(/\s+/g,'').trim();
+        if(h === 'churnscore' || h === 'churn-score' || h === 'churn_score'){
+          COL_CHURNSCORE = i;
+          break;
+        }
+      }
+
+      // Helpers para Churn
+      const normTxt = s => String(s||'')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/\s+/g,' ').trim();
+      const CHURN_CARTEIRAS_VALIDAS = ['Black 1','Black 2','Black 3','Titanium 1','Titanium 2','Platinum 1','Platinum 2'];
+      const CHURN_CART_NORM = {};
+      CHURN_CARTEIRAS_VALIDAS.forEach(c => {
+        const k = normTxt(c);
+        CHURN_CART_NORM[k] = c;
+        // tolera variantes sem espaço (ex.: "Platinum1")
+        CHURN_CART_NORM[k.replace(/\s+/g,'')] = c;
+      });
+
+      const churnPorCarteira = {};
+      CHURN_CARTEIRAS_VALIDAS.forEach(c => { churnPorCarteira[c] = []; });
 
       // Monta dicionário: campanha (lowercase) → { ultima, proxima }
       const planilhaMap = {};
@@ -909,7 +1210,30 @@ function importarPlanilha(event) {
         const ultima  = parseDate(row[COL_ULTIMA]);
         const proxima = parseDate(row[COL_PROXIMA]);
         planilhaMap[campanha.toLowerCase()] = { ultima, proxima };
+
+        // ── CHURN: filtro + classificação ──
+        const situacao = normTxt(row[COL_SITUACAO]);
+        // Ignora clientes em "churn" ou "processo churn"
+        if(situacao === 'churn' || situacao === 'processo churn'
+           || situacao.includes('processo churn') || situacao === 'em churn'){
+          continue;
+        }
+        const cartRaw = normTxt(row[COL_CATEGORIA]);
+        const carteiraDoCliente = CHURN_CART_NORM[cartRaw];
+        if(!carteiraDoCliente) continue; // categoria fora das 7 carteiras → ignora
+
+        const scoreRaw = normTxt(row[COL_CHURNSCORE]);
+        let bucket = null;
+        if(scoreRaw === 'baixo' || scoreRaw === 'low') bucket = 'baixo';
+        else if(scoreRaw === 'medio' || scoreRaw === 'media' || scoreRaw === 'medium') bucket = 'medio';
+        else if(scoreRaw === 'alto' || scoreRaw === 'high') bucket = 'alto';
+        if(!bucket) continue; // sem score válido → ignora
+
+        churnPorCarteira[carteiraDoCliente].push({ campanha, score: bucket });
       }
+
+      // Atualiza estrutura global de Churn
+      CHURN_DATA = { porCarteira: churnPorCarteira };
 
       // Atualiza registros de TODAS as carteiras pelo nome do cliente
       // (busca: nome do cliente == campanha, case-insensitive)
@@ -934,6 +1258,7 @@ function importarPlanilha(event) {
 
       refreshAll();
       renderAprovacoes();
+      renderChurn();
       // Persiste no banco
       const dbRows = [];
       Object.entries(CARTEIRAS).forEach(([key, cart]) => {
@@ -941,6 +1266,7 @@ function importarPlanilha(event) {
       });
       db.from('reunioes_records').upsert(dbRows).then(({error}) => { if(error) console.error('Erro ao salvar no banco:', error); });
       dbSaveAprovacoes();
+      dbSaveChurn();
     } catch (err) {
       console.error(err);
       statusEl.textContent = '✗ Erro ao ler planilha';
@@ -954,6 +1280,6 @@ function importarPlanilha(event) {
   reader.readAsArrayBuffer(file);
 }
 
-async function init(){await dbLoadAll();refreshAll();renderAprovacoes();}
+async function init(){await dbLoadAll();refreshAll();renderAprovacoes();renderChurn();}
 init();
 </script>
